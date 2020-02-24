@@ -13,20 +13,31 @@ class Utils:
 
 		############################################
 		##	Setting Client Connection
-		client = TrelloClient(
-		    api_key= self.data.get_api_key(),
-		    api_secret= self.data.get_api_secret(),
-		    token= self.data.get_token(),
-		)
+		try:
+			client = TrelloClient(
+			    api_key= self.data.get_api_key(),
+			    api_secret= self.data.get_api_secret(),
+			    token= self.data.get_token(),
+			)
+		except:
+			print("[TRELLO] An error ocurred while parsing api key")
+			return
 
 		###########################################
 		##	Searching for board Name
-		all_boards = client.list_boards()
-		self.BOARD = None
-		for i in all_boards:
-			if i.name == self.data.get_board_name():
-				self.BOARD = i
-				break
+		try:
+			all_boards = client.list_boards()
+			self.BOARD = None
+			for i in all_boards:
+				if i.name == self.data.get_board_name():
+					self.BOARD = i
+					break
+		except:
+			print("[TRELLO] An error ocurred while trying to retrieve board")
+			print("[TRELLO] Known boards:")
+			for i in all_boards:
+				print("\t"+str(i))
+			return
 
 		###########################################
 		##	Searching for board done list
