@@ -24,6 +24,11 @@ class TrelloProcess:
 		self.get_lists()
 		self.process_data()
 
+		# Debugger
+		self.CARDS.printDict()
+		self.ACOMPANHAMENTOS.printDict()
+		self.AUDIENCIAS.printDict()
+
 	###################################
 	##	METHODS						  #
 	###################################
@@ -82,7 +87,7 @@ class TrelloProcess:
 	def structure_classes(self):
 		self.CARDS = cards.Card(self.USERS)
 		self.ACOMPANHAMENTOS = acompanhamentos.Acompanhamentos(self.USERS)
-		self.AUCIENCIAS = audiencias.Audiencias(self.USERS)
+		self.AUDIENCIAS = audiencias.Audiencias(self.USERS)
 
 	# Process data retrieved from trello FINALIZADO list
 	def process_feito_list(self):
@@ -127,85 +132,91 @@ class TrelloProcess:
 
 	# Process data retrieved from trello ACOMPANHAMENTO list
 	def process_acompanhamento_list(self):
-		for card in self.ESTUDOS_E_ACOMPANHAMENTOS.list_cards():
-			#Dict Structure
-			data = {
-				"processo":None,
-				"descricao":None,
-				"Tarefa":None,
-				"Cliente":None,
-				"Criado em":None,
-				"Prazo Fatal":None,
-				"Prazo":None,
-				"Realizado em":None,
-				"Advogado":None
-			}
+		try:
+			for card in self.ESTUDOS_E_ACOMPANHAMENTOS.list_cards():
+				#Dict Structure
+				data = {
+					"processo":None,
+					"descricao":None,
+					"Tarefa":None,
+					"Cliente":None,
+					"Criado em":None,
+					"Prazo Fatal":None,
+					"Prazo":None,
+					"Realizado em":None,
+					"Advogado":None
+				}
 
-			#Processing Dict
-			data["processo"] = card.name #card name -> processo
-			data["descricao"] = card.description #Description
+				#Processing Dict
+				data["processo"] = card.name #card name -> processo
+				data["descricao"] = card.description #Description
 
-			#Setting up custom fields
-			for customField in card.customFields:
-				data[customField.name] = customField.value
+				#Setting up custom fields
+				for customField in card.customFields:
+					data[customField.name] = customField.value
 
-			#Setting up name
-			try:
-				user_id = card.member_id[0]
-				user_id = Member(self.client, user_id)
-				data["Advogado"] = user_id.fetch().full_name
-			except:
-				print("Advogado não atrelado ao card")
-				continue
+				#Setting up name
+				try:
+					user_id = card.member_id[0]
+					user_id = Member(self.client, user_id)
+					data["Advogado"] = user_id.fetch().full_name
+				except:
+					print("Advogado não atrelado ao card")
+					continue
 
-			#Dates
-			data["Realizado em"] = self.clean_date(data["Realizado em"])
-			data["Criado em"] = self.clean_date(data["Criado em"])
-			data["Prazo Fatal"] = self.clean_date(data["Prazo Fatal"])
-			data["Prazo"] = self.clean_date(data["Prazo"])
+				#Dates
+				data["Realizado em"] = self.clean_date(data["Realizado em"])
+				data["Criado em"] = self.clean_date(data["Criado em"])
+				data["Prazo Fatal"] = self.clean_date(data["Prazo Fatal"])
+				data["Prazo"] = self.clean_date(data["Prazo"])
 
-			self.ACOMPANHAMENTOS.addCard(data['Advogado'], data)
+				self.ACOMPANHAMENTOS.addCard(data['Advogado'], data)
+		except:
+			print("[FAILURE] process_acompanhamento_list")
 
 	# Process data retrieved from trello JULGAMENTO list
 	def process_julgamento_list(self):
-		for card in self.AUDIENCIAS_E_JULGAMENTOS.list_cards():
-			#Dict Structure
-			data = {
-				"processo":None,
-				"descricao":None,
-				"Tarefa":None,
-				"Cliente":None,
-				"Criado em":None,
-				"Prazo Fatal":None,
-				"Prazo":None,
-				"Realizado em":None,
-				"Advogado":None
-			}
+		try:
+			for card in self.AUDIENCIAS_E_JULGAMENTOS.list_cards():
+				#Dict Structure
+				data = {
+					"processo":None,
+					"descricao":None,
+					"Tarefa":None,
+					"Cliente":None,
+					"Criado em":None,
+					"Prazo Fatal":None,
+					"Prazo":None,
+					"Realizado em":None,
+					"Advogado":None
+				}
 
-			#Processing Dict
-			data["processo"] = card.name #card name -> processo
-			data["descricao"] = card.description #Description
+				#Processing Dict
+				data["processo"] = card.name #card name -> processo
+				data["descricao"] = card.description #Description
 
-			#Setting up custom fields
-			for customField in card.customFields:
-				data[customField.name] = customField.value
+				#Setting up custom fields
+				for customField in card.customFields:
+					data[customField.name] = customField.value
 
-			#Setting up name
-			try:
-				user_id = card.member_id[0]
-				user_id = Member(self.client, user_id)
-				data["Advogado"] = user_id.fetch().full_name
-			except:
-				print("Advogado não atrelado ao card")
-				continue
+				#Setting up name
+				try:
+					user_id = card.member_id[0]
+					user_id = Member(self.client, user_id)
+					data["Advogado"] = user_id.fetch().full_name
+				except:
+					print("Advogado não atrelado ao card")
+					continue
 
-			#Dates
-			data["Realizado em"] = self.clean_date(data["Realizado em"])
-			data["Criado em"] = self.clean_date(data["Criado em"])
-			data["Prazo Fatal"] = self.clean_date(data["Prazo Fatal"])
-			data["Prazo"] = self.clean_date(data["Prazo"])
+				#Dates
+				data["Realizado em"] = self.clean_date(data["Realizado em"])
+				data["Criado em"] = self.clean_date(data["Criado em"])
+				data["Prazo Fatal"] = self.clean_date(data["Prazo Fatal"])
+				data["Prazo"] = self.clean_date(data["Prazo"])
 
-			self.AUCIENCIAS.addCard(data['Advogado'], data)
+				self.AUDIENCIAS.addCard(data['Advogado'], data)
+		except:
+			print("[FAILURE] process_julgamento_list")
 
 	def clean_date(self, date_str):
 		if date_str == None:
@@ -247,8 +258,9 @@ class TrelloProcess:
 		try:
 			self.AUDIENCIAS_E_JULGAMENTOS = None
 			for i in self.BOARD.list_lists():
-				if i.name == self.date.get_list_audiencias_e_julgamentos():
+				if i.name == self.data.get_list_audiencias_e_julgamentos():
 					self.AUDIENCIAS_E_JULGAMENTOS = i
+					break
 			print("[TRELLO] List "+ self.AUDIENCIAS_E_JULGAMENTOS.name +" Found")
 		except:
 			print("[TRELLO] An error ocurred while trying to get board")
