@@ -6,6 +6,7 @@ import audiencias as ad
 import xlsx
 import threading
 
+#Deprecated
 class Utils:
 
 	def __init__(self):
@@ -142,6 +143,8 @@ class Utils:
 			data["Criado em"] = self.clean_date(data["Criado em"])
 			data["Prazo Fatal"] = self.clean_date(data["Prazo Fatal"])
 			data["Prazo"] = self.clean_date(data["Prazo"])
+
+
 
 
 
