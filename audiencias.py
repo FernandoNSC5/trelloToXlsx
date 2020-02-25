@@ -6,7 +6,10 @@ class Audiencias:
 			self.usersDict[i] = list()
 
 	def addCard(self, user, card):
-		self.userDict[user].append(card)
+		self.usersDict[user].append(card)
 
 	def getCardList(self, user):
-		return self.userDict[user]
+		return self.usersDict[user]
+
+	def printDict(self):
+		print(self.usersDict)
