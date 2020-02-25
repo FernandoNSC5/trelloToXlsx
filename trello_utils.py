@@ -91,6 +91,19 @@ class Utils:
 			user_id = Member(self.client, user_id)
 			data["Advogado"] = user_id.fetch().full_name
 
+			#Dates
+			data["Realizado em"] = self.clean_date(data["Realizado em"])
+			data["Criado em"] = self.clean_date(data["Criado em"])
+			data["Prazo Fatal"] = self.clean_date(data["Prazo Fatal"])
+			data["Prazo"] = self.clean_date(data["Prazo"])
+
 			self.CARDS.append(data)
+			
+
+	def clean_date(self, date_str):
+		if date_str == None:
+			return None
+		new_date = date_str[0:10].split("-")
+		return new_date[2]+"/"+new_date[1]+"/"+new_date[0]
 
 u = Utils()
