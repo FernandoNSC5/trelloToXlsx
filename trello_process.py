@@ -1,10 +1,13 @@
 from trello import TrelloClient, Member
 import threading
+import sys
+sys.path.append("structure/")
 
 import data as dt
 import cards
 import acompanhamentos
 import audiencias
+import excel_utils
 
 class TrelloProcess:
 
@@ -24,10 +27,14 @@ class TrelloProcess:
 		self.get_lists()
 		self.process_data()
 
-		# Debugger
-		self.CARDS.printDict()
-		self.ACOMPANHAMENTOS.printDict()
-		self.AUDIENCIAS.printDict()
+		# Debugger		
+		'''
+		print("--FROM TP---")
+		print(self.CARDS.getDict())
+		print(self.AUDIENCIAS)
+		print(self.ESTUDOS_E_ACOMPANHAMENTOS)
+		print("--END TP--")'''
+		self.write_xlsx(self.CARDS.getDict(), self.AUDIENCIAS.getDict(), self.ACOMPANHAMENTOS.getDict(), self.USERS)
 
 	###################################
 	##	METHODS						  #
@@ -223,6 +230,9 @@ class TrelloProcess:
 			return None
 		new_date = date_str[0:10].split("-")
 		return new_date[2]+"/"+new_date[1]+"/"+new_date[0]
+
+	def write_xlsx(self, prazo, julgamento, audiencia, usuario):
+		xlsx = excel_utils.XLSX(prazo, julgamento, audiencia, usuario)
 
 	######################################################################
 	###	CREATING LISTS
