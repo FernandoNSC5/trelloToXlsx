@@ -39,4 +39,19 @@ class Data:
 	def get_list_audiencias_e_julgamentos(self):
 		return self.buffer[6]
 
+	def get_list_cabral(self):
+		return self.buffer[7]
+
+	def get_list_paulo(self):
+		return self.buffer[8]
+
+	def get_list_raul(self):
+		return self.buffer[9]
+
+	def get_list_vitoria(self):
+		return self.buffer[10]
+
+	def get_list_fazendo(self):
+		return self.buffer[11]
+
 d = Data()
