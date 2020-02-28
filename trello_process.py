@@ -19,22 +19,27 @@ class TrelloProcess:
 		self.USERS = list()
 
 		##############################
+		##	LISTS
+		self.DONE_LIST = None
+		self.FAZENDO_LIST = None
+		self.CABRAL_LIST = None
+		self.VITORIA_LIST = None
+		self.PAULO_LIST = None
+		self.RAUL_LIST = None
+		self.AUDIENCIAS_E_JULGAMENTOS_LIST = None
+		self.ESTUDOS_E_ACOMPANHAMENTOS_LIST = None
+
+		##############################
 		##	Starting
 		self.connection()
 		self.get_board()
 		self.get_board_users()
-		self.structure_classes()
+		self.CARDS = cards.Card(self.USERS)
 		self.get_lists()
 		self.process_data()
 
-		# Debugger		
-		'''
-		print("--FROM TP---")
-		print(self.CARDS.getDict())
-		print(self.AUDIENCIAS)
-		print(self.ESTUDOS_E_ACOMPANHAMENTOS)
-		print("--END TP--")'''
-		self.write_xlsx(self.CARDS.getDict(), self.AUDIENCIAS.getDict(), self.ACOMPANHAMENTOS.getDict(), self.USERS)
+		print(self.USERS)
+		#self.write_xlsx(self.CARDS.getDict(), self.AUDIENCIAS.getDict(), self.ACOMPANHAMENTOS.getDict(), self.USERS)
 
 	###################################
 	##	METHODS						  #
@@ -47,9 +52,9 @@ class TrelloProcess:
 			    api_secret= self.data.get_api_secret(),
 			    token= self.data.get_token(),
 			)
-			print("[TRELLO] Connection stabilished")
+			print("[SYSTEM] Connection stabilished")
 		except:
-			print("[TRELLO] An error ocurred while parsing api key")
+			print("[SYSTEM] An error ocurred while parsing api key")
 			return
 
 	#Searching for board
@@ -61,10 +66,10 @@ class TrelloProcess:
 				if i.name == self.data.get_board_name():
 					self.BOARD = i
 					break
-			print("[TRELLO] Board found")
+			print("[SYSTEM] Board found")
 		except:
-			print("[TRELLO] An error ocurred while trying to retrieve board")
-			print("[TRELLO] Known boards:")
+			print("[SYSTEM] An error ocurred while trying to retrieve board")
+			print("[SYSTEM] Known boards:")
 			for i in all_boards:
 				print("\t"+str(i))
 			return
@@ -74,11 +79,36 @@ class TrelloProcess:
 		self.get_list_feito()
 		self.get_list_acompanhamentos()
 		self.get_list_julgamentos()
+		self.get_list_cabral()
+		self.get_list_paulo()
+		self.get_list_raul()
+		self.get_list_vitoria()
+		self.get_list_fazendo()
 
 	def process_data(self):
-		self.process_feito_list()
+		print("[SYSTEM] Processing data recived", end=".")
+		sys.stdout.flush()
+		self.process_fazendo_list()
+		print("", end=".")
+		sys.stdout.flush()
 		self.process_acompanhamento_list()
+		print("", end=".")
+		sys.stdout.flush()
 		self.process_julgamento_list()
+		print("", end=".")
+		sys.stdout.flush()
+		self.process_cabral_list()
+		print("", end=".")
+		sys.stdout.flush()
+		self.process_paulo_list()
+		print("", end=".")
+		sys.stdout.flush()
+		self.process_raul_list()
+		print("", end=".")
+		sys.stdout.flush()
+		self.process_vitoria_list()
+		print(" finished")
+		sys.stdout.flush()
 
 	# Searching for board users
 	def get_board_users(self):
@@ -87,18 +117,100 @@ class TrelloProcess:
 			for member in members:
 				self.USERS.append(member.fetch().full_name)
 		except:
-			print("[TRELLO] An error ocurred while searching for users")
+			print("[SYSTEM] An error ocurred while searching for users")
 			return
 
-	# Creating data structure classes
-	def structure_classes(self):
-		self.CARDS = cards.Card(self.USERS)
-		self.ACOMPANHAMENTOS = acompanhamentos.Acompanhamentos(self.USERS)
-		self.AUDIENCIAS = audiencias.Audiencias(self.USERS)
+	# Process data retrieved from trello ACOMPANHAMENTO list
+	def process_acompanhamento_list(self):
+		try:
+			for card in self.ESTUDOS_E_ACOMPANHAMENTOS_LIST.list_cards():
+				#Dict Structure
+				data = {
+					"processo":None,
+					"descricao":None,
+					"Tarefa":None,
+					"Cliente":None,
+					"Criado em":None,
+					"Prazo Fatal":None,
+					"Prazo":None,
+					"Realizado em":None,
+					"Advogado":None
+				}
 
-	# Process data retrieved from trello FINALIZADO list
-	def process_feito_list(self):
-		for card in self.DONE_LIST.list_cards():
+				#Processing Dict
+				data["processo"] = card.name #card name -> processo
+				data["descricao"] = card.description #Description
+
+				#Setting up custom fields
+				for customField in card.customFields:
+					data[customField.name] = customField.value
+
+				#Setting up name
+				try:
+					user_id = card.member_id[0]
+					user_id = Member(self.client, user_id)
+					data["Advogado"] = user_id.fetch().full_name
+				except:
+					print("Advogado não atrelado ao card")
+					continue
+
+				#Dates
+				data["Realizado em"] = self.clean_date(data["Realizado em"])
+				data["Criado em"] = self.clean_date(data["Criado em"])
+				data["Prazo Fatal"] = self.clean_date(data["Prazo Fatal"])
+				data["Prazo"] = self.clean_date(data["Prazo"])
+
+				self.CARDS.addCard(data['Advogado'], data)
+		except:
+			print("[FAILURE] process_acompanhamento_list " + card.name)
+
+	# Process data retrieved from trello JULGAMENTO list
+	def process_julgamento_list(self):
+		try:
+			for card in self.AUDIENCIAS_E_JULGAMENTOS_LIST.list_cards():
+				#Dict Structure
+				data = {
+					"processo":None,
+					"descricao":None,
+					"Tarefa":None,
+					"Cliente":None,
+					"Criado em":None,
+					"Prazo Fatal":None,
+					"Prazo":None,
+					"Realizado em":None,
+					"Advogado":None
+				}
+
+				#Processing Dict
+				data["processo"] = card.name #card name -> processo
+				data["descricao"] = card.description #Description
+
+				#Setting up custom fields
+				for customField in card.customFields:
+					data[customField.name] = customField.value
+
+				#Setting up name
+				try:
+					user_id = card.member_id[0]
+					user_id = Member(self.client, user_id)
+					data["Advogado"] = user_id.fetch().full_name
+				except:
+					print("Advogado não atrelado ao card " + card.name)
+					continue
+
+				#Dates
+				data["Realizado em"] = self.clean_date(data["Realizado em"])
+				data["Criado em"] = self.clean_date(data["Criado em"])
+				data["Prazo Fatal"] = self.clean_date(data["Prazo Fatal"])
+				data["Prazo"] = self.clean_date(data["Prazo"])
+
+				self.CARDS.addCard(data['Advogado'], data)
+		except:
+			print("[FAILURE] process_julgamento_list")
+
+	# Process data retrieved from trello fazendo list
+	def process_fazendo_list(self):
+		for card in self.FAZENDO_LIST.list_cards():
 			#Dict Structure
 			data = {
 				"processo":None,
@@ -126,7 +238,7 @@ class TrelloProcess:
 				user_id = Member(self.client, user_id)
 				data["Advogado"] = user_id.fetch().full_name
 			except:
-				print("Advogado não atrelado ao card")
+				print("Advogado não atrelado ao card " + card.name)
 				continue
 
 			#Dates
@@ -137,93 +249,169 @@ class TrelloProcess:
 
 			self.CARDS.addCard(data['Advogado'], data)
 
-	# Process data retrieved from trello ACOMPANHAMENTO list
-	def process_acompanhamento_list(self):
-		try:
-			for card in self.ESTUDOS_E_ACOMPANHAMENTOS.list_cards():
-				#Dict Structure
-				data = {
-					"processo":None,
-					"descricao":None,
-					"Tarefa":None,
-					"Cliente":None,
-					"Criado em":None,
-					"Prazo Fatal":None,
-					"Prazo":None,
-					"Realizado em":None,
-					"Advogado":None
-				}
+	# Process data retrieved from trello CABRAL list
+	def process_cabral_list(self):
+		for card in self.CABRAL_LIST.list_cards():
+			#Dict Structure
+			data = {
+				"processo":None,
+				"descricao":None,
+				"Tarefa":None,
+				"Cliente":None,
+				"Criado em":None,
+				"Prazo Fatal":None,
+				"Prazo":None,
+				"Realizado em":None,
+				"Advogado":None
+			}
 
-				#Processing Dict
-				data["processo"] = card.name #card name -> processo
-				data["descricao"] = card.description #Description
+			#Processing Dict
+			data["processo"] = card.name #card name -> processo
+			data["descricao"] = card.description #Description
 
-				#Setting up custom fields
-				for customField in card.customFields:
-					data[customField.name] = customField.value
+			#Setting up custom fields
+			for customField in card.customFields:
+				data[customField.name] = customField.value
 
-				#Setting up name
-				try:
-					user_id = card.member_id[0]
-					user_id = Member(self.client, user_id)
-					data["Advogado"] = user_id.fetch().full_name
-				except:
-					print("Advogado não atrelado ao card")
-					continue
+			#Setting up name
+			try:
+				user_id = card.member_id[0]
+				user_id = Member(self.client, user_id)
+				data["Advogado"] = user_id.fetch().full_name
+			except:
+				print("Advogado não atrelado ao card " + card.name)
+				continue
 
-				#Dates
-				data["Realizado em"] = self.clean_date(data["Realizado em"])
-				data["Criado em"] = self.clean_date(data["Criado em"])
-				data["Prazo Fatal"] = self.clean_date(data["Prazo Fatal"])
-				data["Prazo"] = self.clean_date(data["Prazo"])
+			#Dates
+			data["Realizado em"] = self.clean_date(data["Realizado em"])
+			data["Criado em"] = self.clean_date(data["Criado em"])
+			data["Prazo Fatal"] = self.clean_date(data["Prazo Fatal"])
+			data["Prazo"] = self.clean_date(data["Prazo"])
 
-				self.ACOMPANHAMENTOS.addCard(data['Advogado'], data)
-		except:
-			print("[FAILURE] process_acompanhamento_list")
+			self.CARDS.addCard(data['Advogado'], data)
 
-	# Process data retrieved from trello JULGAMENTO list
-	def process_julgamento_list(self):
-		try:
-			for card in self.AUDIENCIAS_E_JULGAMENTOS.list_cards():
-				#Dict Structure
-				data = {
-					"processo":None,
-					"descricao":None,
-					"Tarefa":None,
-					"Cliente":None,
-					"Criado em":None,
-					"Prazo Fatal":None,
-					"Prazo":None,
-					"Realizado em":None,
-					"Advogado":None
-				}
+	# Process data retrieved from trello PAULO list
+	def process_paulo_list(self):
+		for card in self.PAULO_LIST.list_cards():
+			#Dict Structure
+			data = {
+				"processo":None,
+				"descricao":None,
+				"Tarefa":None,
+				"Cliente":None,
+				"Criado em":None,
+				"Prazo Fatal":None,
+				"Prazo":None,
+				"Realizado em":None,
+				"Advogado":None
+			}
 
-				#Processing Dict
-				data["processo"] = card.name #card name -> processo
-				data["descricao"] = card.description #Description
+			#Processing Dict
+			data["processo"] = card.name #card name -> processo
+			data["descricao"] = card.description #Description
 
-				#Setting up custom fields
-				for customField in card.customFields:
-					data[customField.name] = customField.value
+			#Setting up custom fields
+			for customField in card.customFields:
+				data[customField.name] = customField.value
 
-				#Setting up name
-				try:
-					user_id = card.member_id[0]
-					user_id = Member(self.client, user_id)
-					data["Advogado"] = user_id.fetch().full_name
-				except:
-					print("Advogado não atrelado ao card")
-					continue
+			#Setting up name
+			try:
+				user_id = card.member_id[0]
+				user_id = Member(self.client, user_id)
+				data["Advogado"] = user_id.fetch().full_name
+			except:
+				print("Advogado não atrelado ao card " + card.name)
+				continue
 
-				#Dates
-				data["Realizado em"] = self.clean_date(data["Realizado em"])
-				data["Criado em"] = self.clean_date(data["Criado em"])
-				data["Prazo Fatal"] = self.clean_date(data["Prazo Fatal"])
-				data["Prazo"] = self.clean_date(data["Prazo"])
+			#Dates
+			data["Realizado em"] = self.clean_date(data["Realizado em"])
+			data["Criado em"] = self.clean_date(data["Criado em"])
+			data["Prazo Fatal"] = self.clean_date(data["Prazo Fatal"])
+			data["Prazo"] = self.clean_date(data["Prazo"])
 
-				self.AUDIENCIAS.addCard(data['Advogado'], data)
-		except:
-			print("[FAILURE] process_julgamento_list")
+			self.CARDS.addCard(data['Advogado'], data)
+
+	# Process data retrieved from trello RAUL list
+	def process_raul_list(self):
+		for card in self.RAUL_LIST.list_cards():
+			#Dict Structure
+			data = {
+				"processo":None,
+				"descricao":None,
+				"Tarefa":None,
+				"Cliente":None,
+				"Criado em":None,
+				"Prazo Fatal":None,
+				"Prazo":None,
+				"Realizado em":None,
+				"Advogado":None
+			}
+
+			#Processing Dict
+			data["processo"] = card.name #card name -> processo
+			data["descricao"] = card.description #Description
+
+			#Setting up custom fields
+			for customField in card.customFields:
+				data[customField.name] = customField.value
+
+			#Setting up name
+			try:
+				user_id = card.member_id[0]
+				user_id = Member(self.client, user_id)
+				data["Advogado"] = user_id.fetch().full_name
+			except:
+				print("Advogado não atrelado ao card " + card.name)
+				continue
+
+			#Dates
+			data["Realizado em"] = self.clean_date(data["Realizado em"])
+			data["Criado em"] = self.clean_date(data["Criado em"])
+			data["Prazo Fatal"] = self.clean_date(data["Prazo Fatal"])
+			data["Prazo"] = self.clean_date(data["Prazo"])
+
+			self.CARDS.addCard(data['Advogado'], data)
+
+	# Process data retrieved from trello VITORIA list
+	def process_vitoria_list(self):
+		for card in self.VITORIA_LIST.list_cards():
+			#Dict Structure
+			data = {
+				"processo":None,
+				"descricao":None,
+				"Tarefa":None,
+				"Cliente":None,
+				"Criado em":None,
+				"Prazo Fatal":None,
+				"Prazo":None,
+				"Realizado em":None,
+				"Advogado":None
+			}
+
+			#Processing Dict
+			data["processo"] = card.name #card name -> processo
+			data["descricao"] = card.description #Description
+
+			#Setting up custom fields
+			for customField in card.customFields:
+				data[customField.name] = customField.value
+
+			#Setting up name
+			try:
+				user_id = card.member_id[0]
+				user_id = Member(self.client, user_id)
+				data["Advogado"] = user_id.fetch().full_name
+			except:
+				print("Advogado não atrelado ao card " + card.name)
+				continue
+
+			#Dates
+			data["Realizado em"] = self.clean_date(data["Realizado em"])
+			data["Criado em"] = self.clean_date(data["Criado em"])
+			data["Prazo Fatal"] = self.clean_date(data["Prazo Fatal"])
+			data["Prazo"] = self.clean_date(data["Prazo"])
+
+			self.CARDS.addCard(data['Advogado'], data)
 
 	def clean_date(self, date_str):
 		if date_str == None:
@@ -240,41 +428,97 @@ class TrelloProcess:
 	# Searching for list 'feito'
 	def get_list_feito(self):
 		try:
-			self.DONE_LIST = None
 			for i in self.BOARD.list_lists():
 				if i.name == self.data.get_list_feito():
 					self.DONE_LIST = i
 					break
-			print("[TRELLO] List "+ self.DONE_LIST.name +" Found")
+			print("[SYSTEM] List "+ self.DONE_LIST.name +" Found")
 		except:
-			print("[TRELLO] An error ocurred while trying to get board 'Finalizado'")
+			print("[SYSTEM] An error ocurred while trying to get board 'Finalizado'")
 			return
 
 	# Searching for list Estudos e Acompanhamentos
 	def get_list_acompanhamentos(self):
 		try:
-			self.ESTUDOS_E_ACOMPANHAMENTOS = None
 			for i in self.BOARD.list_lists():
 				if i.name == self.data.get_list_estudos_e_acompanhamentos():
-					self.ESTUDOS_E_ACOMPANHAMENTOS = i
+					self.ESTUDOS_E_ACOMPANHAMENTOS_LIST = i
 					break
-			print("[TRELLO] List "+ self.ESTUDOS_E_ACOMPANHAMENTOS.name +" Found")
+			print("[SYSTEM] List "+ self.ESTUDOS_E_ACOMPANHAMENTOS_LIST.name +" Found")
 		except:
-			print("[TRELLO] An error occurred while trying to get board")
+			print("[SYSTEM] An error occurred while trying to get board")
 			return
 
 	# Searching for list Audiências e Julgamentos
 	def get_list_julgamentos(self):
 		try:
-			self.AUDIENCIAS_E_JULGAMENTOS = None
 			for i in self.BOARD.list_lists():
 				if i.name == self.data.get_list_audiencias_e_julgamentos():
-					self.AUDIENCIAS_E_JULGAMENTOS = i
+					self.AUDIENCIAS_E_JULGAMENTOS_LIST = i
 					break
-			print("[TRELLO] List "+ self.AUDIENCIAS_E_JULGAMENTOS.name +" Found")
+			print("[SYSTEM] List "+ self.AUDIENCIAS_E_JULGAMENTOS_LIST.name +" Found")
 		except:
-			print("[TRELLO] An error ocurred while trying to get board")
+			print("[SYSTEM] An error ocurred while trying to get board")
 			return
 
+	# Searching for list cabral
+	def get_list_cabral(self):
+		try:
+			for i in self.BOARD.list_lists():
+				if i.name == self.data.get_list_cabral():
+					self.CABRAL_LIST = i
+					break 
+			print("[SYSTEM] List " + self.CABRAL_LIST.name + " Found")
+		except:
+			print("[SYSTEM] An error ocurred while trying to get board")
+			return
+
+	# Searching for list paulo
+	def get_list_paulo(self):
+		try:
+			for i in self.BOARD.list_lists():
+				if i.name == self.data.get_list_paulo():
+					self.PAULO_LIST = i
+					break
+			print("[SYSTEM] List " + self.PAULO_LIST.name + " Found")
+		except:
+			print("[SYSTEM] An error ocurred while trying to get board")
+			return
+
+	# Searching for list raul
+	def get_list_raul(self):
+		try:
+			for i in self.BOARD.list_lists():
+				if i.name == self.data.get_list_raul():
+					self.RAUL_LIST = i
+					break
+			print("[SYSTEM] List " + self.RAUL_LIST.name + " Found")
+		except:
+			print("[SYSTEM] An error ocurred while trying to get board")
+			return
+
+	# Searching for list vitoria
+	def get_list_vitoria(self):
+		try:
+			for i in self.BOARD.list_lists():
+				if i.name == self.data.get_list_vitoria():
+					self.VITORIA_LIST = i
+					break
+			print("[SYSTEM] List " + self.VITORIA_LIST.name + " Found")
+		except:
+			print("[SYSTEM] An error ocurred while trying to get board")
+			return
+
+	# Searching for list fazendo
+	def get_list_fazendo(self):
+		try:
+			for i in self.BOARD.list_lists():
+				if i.name == self.data.get_list_fazendo():
+					self.FAZENDO_LIST = i
+					break
+			print("[SYSTEM] List " + self.FAZENDO_LIST.name + " Found")
+		except:
+			print("[SYSTEM] An error ocurred while trying to get board")
+			return
 
 t = TrelloProcess()
