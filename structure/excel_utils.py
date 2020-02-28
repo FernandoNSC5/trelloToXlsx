@@ -1,7 +1,29 @@
 from openpyxl import load_workbook
 from datetime import datetime
+import printDataStructure
 
 class XLSX:
+
+	def __init__self(self, prazos, audiencias, acompanhamentos):
+		# Basic variables
+		self.prazos = prazos
+		self.audiencias = audiencias
+		self.acompanhamentos = acompanhamentos
+		self.max_rows = 100
+
+		#Hardcoded users
+		self.CABRAL = ["cabral", "Cabral"]
+		self.PAULO = ["paulostoledo", "Paulo Toledo"]
+		self.RAUL = ["raul_marcos_lobato", "Raul Lobato"]
+
+	def load_data(self):
+
+		#Types
+		plan = list()
+
+		wb = load_workbook("src/planilha.xlsx")
+		ws = wb.worksheets[0]
+
 
 	def __init__(self, prazos, julgamentos, audiencias, users):
 		self.prazos = prazos
