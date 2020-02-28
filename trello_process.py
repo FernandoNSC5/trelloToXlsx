@@ -29,16 +29,24 @@ class TrelloProcess:
 		self.AUDIENCIAS_E_JULGAMENTOS_LIST = None
 		self.ESTUDOS_E_ACOMPANHAMENTOS_LIST = None
 
+		# Hardcoded (for now) users
+		# TO DO -> Change it using ui later
+		self.CABRAL = ["cabral", "Cabral"]
+		self.PAULO = ["paulostoledo", "Paulo Toledo"]
+		self.RAUL = ["raul_marcos_lobato", "Raul Lobato"]
+		self.VITORIA = ["Vitória Tiannamen", "Vitória Tiannamen"]
+
 		##############################
 		##	Starting
 		self.connection()
 		self.get_board()
 		self.get_board_users()
 		self.CARDS = cards.Card(self.USERS)
+		self.ACOMPANHAMENTOS = cards.Cards(self.USERS)
+		self.AUDIENCIAS = cards.Cards(self.USERS)
 		self.get_lists()
 		self.process_data()
 
-		print(self.USERS)
 		#self.write_xlsx(self.CARDS.getDict(), self.AUDIENCIAS.getDict(), self.ACOMPANHAMENTOS.getDict(), self.USERS)
 
 	###################################
@@ -73,6 +81,20 @@ class TrelloProcess:
 			for i in all_boards:
 				print("\t"+str(i))
 			return
+
+	def filter_name(self, name):
+
+		#Finding user real name based on nickname on trello board
+		if  self.CABRAL[0] == name:
+			return self.CABRAL[1]
+		if self.PAULO[0] == name:
+			return self.PAULO[1]
+		if self.RAUL[0] == name:
+			return self.RAUL[1]
+		if self.VITORIA[0] == name:
+			return self.VITORIA[1]
+
+		return "No user found"
 
 	# Searching for lists into board
 	def get_lists(self):
@@ -149,7 +171,8 @@ class TrelloProcess:
 				try:
 					user_id = card.member_id[0]
 					user_id = Member(self.client, user_id)
-					data["Advogado"] = user_id.fetch().full_name
+					user = user_id.fetch().full_name
+					data["Advogado"] = self.filter_name(user)
 				except:
 					print("Advogado não atrelado ao card")
 					continue
@@ -161,6 +184,7 @@ class TrelloProcess:
 				data["Prazo"] = self.clean_date(data["Prazo"])
 
 				self.CARDS.addCard(data['Advogado'], data)
+				self.ACOMPANHAMENTOS.addCard(data['Advogado'], data)
 		except:
 			print("[FAILURE] process_acompanhamento_list " + card.name)
 
@@ -193,7 +217,8 @@ class TrelloProcess:
 				try:
 					user_id = card.member_id[0]
 					user_id = Member(self.client, user_id)
-					data["Advogado"] = user_id.fetch().full_name
+					user = user_id.fetch().full_name
+					data["Advogado"] = self.filter_name(user)
 				except:
 					print("Advogado não atrelado ao card " + card.name)
 					continue
@@ -205,6 +230,7 @@ class TrelloProcess:
 				data["Prazo"] = self.clean_date(data["Prazo"])
 
 				self.CARDS.addCard(data['Advogado'], data)
+				self.AUDIENCIAS.addCard(data['Advogado'], data)
 		except:
 			print("[FAILURE] process_julgamento_list")
 
@@ -236,7 +262,8 @@ class TrelloProcess:
 			try:
 				user_id = card.member_id[0]
 				user_id = Member(self.client, user_id)
-				data["Advogado"] = user_id.fetch().full_name
+				user = user_id.fetch().full_name
+				data["Advogado"] = self.filter_name(user)
 			except:
 				print("Advogado não atrelado ao card " + card.name)
 				continue
@@ -277,7 +304,8 @@ class TrelloProcess:
 			try:
 				user_id = card.member_id[0]
 				user_id = Member(self.client, user_id)
-				data["Advogado"] = user_id.fetch().full_name
+				user = user_id.fetch().full_name
+				data["Advogado"] = self.filter_name(user)
 			except:
 				print("Advogado não atrelado ao card " + card.name)
 				continue
@@ -318,7 +346,8 @@ class TrelloProcess:
 			try:
 				user_id = card.member_id[0]
 				user_id = Member(self.client, user_id)
-				data["Advogado"] = user_id.fetch().full_name
+				user = user_id.fetch().full_name
+				data["Advogado"] = self.filter_name(user)
 			except:
 				print("Advogado não atrelado ao card " + card.name)
 				continue
@@ -359,7 +388,8 @@ class TrelloProcess:
 			try:
 				user_id = card.member_id[0]
 				user_id = Member(self.client, user_id)
-				data["Advogado"] = user_id.fetch().full_name
+				user = user_id.fetch().full_name
+				data["Advogado"] = self.filter_name(user)
 			except:
 				print("Advogado não atrelado ao card " + card.name)
 				continue
@@ -400,7 +430,8 @@ class TrelloProcess:
 			try:
 				user_id = card.member_id[0]
 				user_id = Member(self.client, user_id)
-				data["Advogado"] = user_id.fetch().full_name
+				user = user_id.fetch().full_name
+				data["Advogado"] = self.filter_name(user)
 			except:
 				print("Advogado não atrelado ao card " + card.name)
 				continue
