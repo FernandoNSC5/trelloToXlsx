@@ -9,7 +9,7 @@ class Data:
 	##	METHODS
 	def load_data(self):
 		f = open('structure/dados.txt', 'r')
-		for i in range(7):
+		for i in range(12):
 			self.buffer.append(str(f.readline()))
 
 	def clean_buffer(self):
