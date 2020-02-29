@@ -11,11 +11,11 @@ class PrintDataStructure:
 		if flag_initial == 1:
 			self.main_structure.append(["", "", "", "", "", "", "", ""])
 			self.main_structure.append(["", "PRAZOS", "", "", "", "", "", ""])
-				self.main_structure.append(["", "", "CLIENTE", "PROCESSO", "RESPONSÁVEL", "OBSERVAÇÕES", "PRAZO FATAL", "PRAZO"])
+			self.main_structure.append(["", "", "CLIENTE", "PROCESSO", "RESPONSÁVEL", "TAREFA", "OBSERVAÇÕES", "PRAZO FATAL", "PRAZO"])
 		elif flag_initial == 2:
-			self.main_structure.append(["", "Estudos e Acompanhamentos", "", "", "", "", "", "", ""])
+			self.main_structure.append(["", "Audiências e Julgamentos", "", "", "", "", "", "", ""])
 		elif flag_initial == 3:
-			self.main_structure.append(["", "Audiências e Julgamentos", "", "", "", "", "", ""])
+			self.main_structure.append(["", "Estudos e Acompanhamentos", "", "", "", "", "", ""])
 
 		#Peoble hard coded (for now) structures
 		self.vitoria = list()
@@ -95,7 +95,7 @@ class PrintDataStructure:
 			self.vitoria.append(data[1])
 
 	def add_to_cabral(self, data):
-		data = self.convert(data, 1):
+		data = self.convert(data, 1)
 		self.cabral.append(data[0])
 		if len(data) > 1:
 			self.cabral.append(data[1])
