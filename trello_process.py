@@ -5,8 +5,6 @@ sys.path.append("structure/")
 
 import data as dt
 import cards
-import acompanhamentos
-import audiencias
 import excel_utils
 
 class TrelloProcess:
@@ -41,18 +39,25 @@ class TrelloProcess:
 		self.connection()
 		self.get_board()
 		self.get_board_users()
-		self.CARDS = cards.Card(self.USERS)
+		self.convert_user()
+		self.CARDS = cards.Cards(self.USERS)
 		self.ACOMPANHAMENTOS = cards.Cards(self.USERS)
 		self.AUDIENCIAS = cards.Cards(self.USERS)
 		self.get_lists()
 		self.process_data()
 
-		#self.write_xlsx(self.CARDS.getDict(), self.AUDIENCIAS.getDict(), self.ACOMPANHAMENTOS.getDict(), self.USERS)
+		self.write_xlsx(self.CARDS.getDict(), self.AUDIENCIAS.getDict(), self.ACOMPANHAMENTOS.getDict())
 
 	###################################
 	##	METHODS						  #
 	###################################
 	# Trello service connection
+	def convert_user(self):
+		index = 0
+		for user in self.USERS:
+			self.USERS[index] = self.filter_name(user)
+			index+=1
+
 	def connection(self):
 		try:
 			self.client = TrelloClient(
@@ -83,7 +88,6 @@ class TrelloProcess:
 			return
 
 	def filter_name(self, name):
-
 		#Finding user real name based on nickname on trello board
 		if  self.CABRAL[0] == name:
 			return self.CABRAL[1]
@@ -94,7 +98,7 @@ class TrelloProcess:
 		if self.VITORIA[0] == name:
 			return self.VITORIA[1]
 
-		return "No user found"
+		return name
 
 	# Searching for lists into board
 	def get_lists(self):
@@ -183,7 +187,6 @@ class TrelloProcess:
 				data["Prazo Fatal"] = self.clean_date(data["Prazo Fatal"])
 				data["Prazo"] = self.clean_date(data["Prazo"])
 
-				self.CARDS.addCard(data['Advogado'], data)
 				self.ACOMPANHAMENTOS.addCard(data['Advogado'], data)
 		except:
 			print("[FAILURE] process_acompanhamento_list " + card.name)
@@ -229,7 +232,6 @@ class TrelloProcess:
 				data["Prazo Fatal"] = self.clean_date(data["Prazo Fatal"])
 				data["Prazo"] = self.clean_date(data["Prazo"])
 
-				self.CARDS.addCard(data['Advogado'], data)
 				self.AUDIENCIAS.addCard(data['Advogado'], data)
 		except:
 			print("[FAILURE] process_julgamento_list")
@@ -450,8 +452,8 @@ class TrelloProcess:
 		new_date = date_str[0:10].split("-")
 		return new_date[2]+"/"+new_date[1]+"/"+new_date[0]
 
-	def write_xlsx(self, prazo, julgamento, audiencia, usuario):
-		xlsx = excel_utils.XLSX(prazo, julgamento, audiencia, usuario)
+	def write_xlsx(self, prazo, julgamento, audiencia):
+		xlsx = excel_utils.XLSX(prazo, julgamento, audiencia)
 
 	######################################################################
 	###	CREATING LISTS
