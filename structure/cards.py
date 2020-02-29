@@ -1,6 +1,6 @@
 import datetime
 
-class Card:
+class Cards:
 
 	def __init__(self, users):
 		self.usersDict = {}
@@ -10,7 +10,7 @@ class Card:
 	######################################
 	# Methods
 	def sort_dict_lists(self):
-		self.UserDict.sort(key=lambda x: datetime.datetime.strptime(x['Prazo'], '%d/%m/%Y'))
+		self.userDict.sort(key=lambda x: datetime.datetime.strptime(x['Prazo'], '%d/%m/%Y'))
 
 	def addCard(self, user, card):
 		self.usersDict[user].append(card)
