@@ -1,32 +1,53 @@
 from openpyxl import load_workbook
 from datetime import datetime
 import printDataStructure
+import sys
 
 class XLSX:
 
-	def __init__self(self, prazos, audiencias, acompanhamentos):
+	def __init__(self, prazos, audiencias, acompanhamentos):
+		print("[XLSX] Initializing module", end=".")
+		sys.stdout.flush()
+
 		# Basic variables
 		self.prazos = prazos
 		self.audiencias = audiencias
 		self.acompanhamentos = acompanhamentos
+
 		self.max_rows = 100 #Defoult. Maybe change at load_data func
 		self.advogados = ["Cabral", "Vitória Tiannamen", "Raul Lobato", "Paulo Toledo"]
+		print("", end=".")
+		sys.stdout.flush()
 
 		# Variables used to append secion indexes
 		self.prazos_rows = list()	#Two indexes (init, end)
 		self.audiencias_rows = list()	#Two indexes (init, end)
 		self.acompanhamentos_rows = list()	#One index (init)
+		print("", end=".")
+		sys.stdout.flush()
 
 		#Print structures
 		self.print_prazos = printDataStructure.PrintDataStructure(1)
 		self.print_audiencias_prazos = printDataStructure.PrintDataStructure(2)
 		self.print_acompanhamento_prazos = printDataStructure.PrintDataStructure(3)
+		print(" Done")
+		sys.stdout.flush()
 
 		# Elements
 		self.load_and_write_data()
-	
+
+	def sort_dict_lists(self, dict_recived): #By date sorting
+		for list_by_user in self.advogados:
+			lista = dict_recived[list_by_user]
+			lista.sort(key=lambda item: item['Prazo'], reverse=False)	
+			dict_recived[list_by_user] = lista
+		return dict_recived
+
 
 	def load_and_write_data(self):
+
+		print("[XLSX] Loading content", end=".")
+		sys.stdout.flush()
 
 		#Types
 		plan = list()
@@ -46,6 +67,9 @@ class XLSX:
 				aux.append(cell.value)
 			plan.append(aux)
 
+		print("", end=".")
+		sys.stdout.flush()
+
 
 		# searching for indexes
 		# Will be used later in order to define how much lines
@@ -62,6 +86,8 @@ class XLSX:
 				if tipo[2] == str(j).strip():
 					self.acompanhamentos_rows.append(index-1)
 					self.audiencias_rows.append(index+1)
+		print("", end=".")
+		sys.stdout.flush()
 
 		# Adding to Data structures that will be used later
 		# in order to build new xlsx
@@ -70,18 +96,22 @@ class XLSX:
 			if index >= self.prazos_rows[0]-1 and index < self.prazos_rows[1]:
 				self.add_to_prazos(i)
 			elif index >= self.acompanhamentos_rows[0]-1 and index < self.acompanhamentos_rows[1]:
-				self.add_to_julgamentos(i)
+				self.add_to_acompanhamentos(i)
 			elif index >= self.audiencias_rows[0]-1:
 				self.add_to_audiencias(i)
 			index += 1
+		print("", end=".")
+		sys.stdout.flush()
 
 		# Sorting data before assingment
-		self.prazos.sort()
-		self.acompanhamentos.sort()
-		self.audiencias.sort()
+		self.prazos = self.sort_dict_lists(self.prazos)
+		#self.acompanhamentos = self.sort_dict_lists(self.acompanhamentos)
+		#self.audiencias = self.sort_dict_lists(self.audicencias)
+		print(" Done")
 
 		# Indexing insto print_data_structure
 		# For Prazos
+		print("[XLSX] Creating new datasheet", end=".")
 		for user in self.prazos.keys():
 			for data in self.prazos[user]:
 				if user == self.advogados[0]:
@@ -92,6 +122,8 @@ class XLSX:
 					self.print_prazos.add_to_raul(data)
 				elif user == self.advogados[3]:
 					self.print_prazos.add_to_paulo(data)
+		print("", end=".")
+		sys.stdout.flush()
 
 		# For Audiencias
 		for user in self.audiencias.keys():
@@ -104,6 +136,8 @@ class XLSX:
 					self.print_audiencias_prazos.add_to_raul(data)
 				elif user == self.advogados[3]:
 					self.print_audiencias_prazos.add_to_paulo(data)
+		print("", end=".")
+		sys.stdout.flush()
 
 		# For Acompanhamentos
 		for user in self.acompanhamentos.keys():
@@ -119,6 +153,8 @@ class XLSX:
 
 		# Agrouping at print_data_structe
 		self.agroup()
+		print("", end=".")
+		sys.stdout.flush()
 
 		#Gets structure to be written
 		written_prazos = self.print_prazos.get_main_structure()
@@ -133,18 +169,26 @@ class XLSX:
 		for i in written_acompanhamentos:
 			written_all.append(i)
 
+		print("", end=".")
+		sys.stdout.flush()
+
 		#Creating new sheet in order to append new data
 		ws = wb.create_sheet("Planilha atualizada", 0)
 		for i in written_all:
 			ws.append(i)
 
+		print(" Done")
+
+		print("[XLSX] Writing file")
 		# Escrevendo
 		wb.save("src/planilha_updated.xlsx")
 
+		print("[XLSX] Completed")
+
 	def agroup(self):
 		self.print_prazos.set_main_structure()
-		self.print_audiencias_prazos.set_main_structure()
 		self.print_acompanhamento_prazos.set_main_structure()
+		self.print_audiencias_prazos.set_main_structure()
 
 	#########################################
 	##	Appends
@@ -185,7 +229,7 @@ class XLSX:
 
 		self.prazos[lista[4]].append(data)
 
-	def add_to_julgamentos(self, lista):
+	def add_to_acompanhamentos(self, lista):
 		if lista[4] == None:
 			return
 
@@ -220,8 +264,8 @@ class XLSX:
 			data['Prazo'] = None
 		data['Advogado'] = lista[4]
 
-		self.julgamentos[lista[4]].append(data)
-		self.prazos[lista[4]].append(data)
+		self.acompanhamentos[lista[4]].append(data)
+		 #self.prazos[lista[4]].append(data)
 
 	def add_to_audiencias(self, lista):
 		if lista[4] == None:
@@ -259,4 +303,4 @@ class XLSX:
 		data['Advogado'] = lista[4]
 
 		self.audiencias[lista[4]].append(data)
-		self.prazos[lista[4]].append(data)	
+		#self.prazos[lista[4]].append(data)	
