@@ -13,9 +13,9 @@ class PrintDataStructure:
 			self.main_structure.append(["", "PRAZOS", "", "", "", "", "", ""])
 			self.main_structure.append(["", "", "CLIENTE", "PROCESSO", "RESPONSÁVEL", "TAREFA", "OBSERVAÇÕES", "PRAZO FATAL", "PRAZO"])
 		elif flag_initial == 2:
-			self.main_structure.append(["", "Audiências e Julgamentos", "", "", "", "", "", "", ""])
+			self.main_structure.append(["", "                                    AUDIÊNCIAS E JULGAMENTOS", "", "", "", "", "", "", ""])
 		elif flag_initial == 3:
-			self.main_structure.append(["", "Estudos e Acompanhamentos", "", "", "", "", "", ""])
+			self.main_structure.append(["", "                                    ESTUDOS E ACOMPANHAMENTOS", "", "", "", "", "", ""])
 
 		#Peoble hard coded (for now) structures
 		self.vitoria = list()

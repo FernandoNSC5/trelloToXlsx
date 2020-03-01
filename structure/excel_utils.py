@@ -51,7 +51,18 @@ class XLSX:
 
 		#Types
 		plan = list()
-		tipo = ["CLIENTE", "ESTUDOS E ACOMPANHAMENTOS", "AUDIÊNCIAS E JULGAMENTOS"]
+		tipo = ["CLIENTE", "ESTUDOS E ACOMPANHAMENTOS", "AUDIÊNCIAS E JULGAMENTOS", "PRAZOS"]
+		self.estilos = [None for i in range(4)]
+
+		################################################
+		#	Style types
+		self.width_dict = {'A': None, 'B': None, 'C': None, 'D': None, 'E': None, 'F': None, 'G': None, 'H': None, 'I': None}
+
+		#0 -> PRAZOS LINE
+		#1 -> CLIENTE LINE
+		#2 -> NORMAL LINES
+		#3 -> LABEL LINES
+		self.styles = [list(), list(), list(), list()]
 
 		wb = load_workbook("src/planilha.xlsx")
 		ws = wb.worksheets[0]
@@ -65,7 +76,12 @@ class XLSX:
 			aux = list()
 			for cell in row:
 				aux.append(cell.value)
+
 			plan.append(aux)
+
+		# Searching for column width
+		for i in self.width_dict.keys():
+			self.width_dict[i] = ws.column_dimensions[i].width
 
 		print("", end=".")
 		sys.stdout.flush()
@@ -82,12 +98,28 @@ class XLSX:
 					self.prazos_rows.append(index+2)
 				if tipo[1] == str(j).strip():
 					self.prazos_rows.append(index-1)
-					self.acompanhamentos_rows.append(index+1)
+					self.acompanhamentos_rows.append(index+2)
 				if tipo[2] == str(j).strip():
 					self.acompanhamentos_rows.append(index-1)
-					self.audiencias_rows.append(index+1)
+					self.audiencias_rows.append(index+2)
 		print("", end=".")
 		sys.stdout.flush()
+
+		#Getting styles
+		prazo_line = self.prazos_rows[0]-3
+		cliente_line = self.prazos_rows[0]-2
+		normal_line = self.prazos_rows[0]
+		estudo_line = self.prazos_rows[1]+1
+		for i in self.width_dict.keys():
+			cel_prazo = str(i)+str(prazo_line)
+			cel_cliente = str(i)+str(cliente_line)
+			cel_normal = str(i)+str(normal_line)
+			cel_estudo = str(i)+str(estudo_line)
+
+			self.styles[0].append(ws[cel_prazo]._style)
+			self.styles[1].append(ws[cel_cliente]._style)
+			self.styles[2].append(ws[cel_normal]._style)
+			self.styles[3].append(ws[cel_estudo]._style)
 
 		# Adding to Data structures that will be used later
 		# in order to build new xlsx
@@ -164,9 +196,9 @@ class XLSX:
 		written_all = list()
 		for i in written_prazos:
 			written_all.append(i)
-		for i in written_audiencias:
-			written_all.append(i)
 		for i in written_acompanhamentos:
+			written_all.append(i)
+		for i in written_audiencias:
 			written_all.append(i)
 
 		print("", end=".")
@@ -176,6 +208,71 @@ class XLSX:
 		ws = wb.create_sheet("Planilha atualizada", 0)
 		for i in written_all:
 			ws.append(i)
+
+		#Loading new plan
+		plan = list()
+		try:
+			self.max_rows = ws.max_row
+		except:
+			print("[XLSX] Impossible to use dynamic rows into file. Using default 100 rows counter")
+
+		for row in ws.iter_rows(min_row=1, max_col=9 , max_row=self.max_rows):
+			aux = list()
+			for cell in row:
+				aux.append(cell.value)
+			plan.append(aux)
+
+		# searching for new indexes
+		# Will be used later in order to define how much lines
+		# Each secion will use (Prazos, Audiencias and Acompanhamentos)
+		index = 0
+		self.prazos_rows = list()
+		self.acompanhamentos_rows = list()
+		self.audiencias_rows = list()
+		for i in plan:
+			index += 1
+			for j in i:
+				if tipo[0] == str(j).strip():
+					self.prazos_rows.append(index+1)
+				if tipo[1] == str(j).strip():
+					self.prazos_rows.append(index-1)
+					self.acompanhamentos_rows.append(index+1)
+				if tipo[2] == str(j).strip():
+					self.acompanhamentos_rows.append(index-1)
+					self.audiencias_rows.append(index+1)
+
+		print("", end=".")
+		sys.stdout.flush()		
+
+		#Creating new style
+		for i in self.width_dict.keys():
+			ws.column_dimensions[i].width = self.width_dict[i]
+
+		#Setting styles
+		index = 0
+		for row in ws.iter_rows(min_row=1, max_col=9 , max_row=self.max_rows):
+			index += 1
+			it = 0
+			for cel in row:
+				try:
+					if index == 2:
+						cel._style = self.styles[0][it]
+					if index == 3:
+						cel._style = self.styles[1][it]
+					if index >= self.prazos_rows[0] and index <= self.prazos_rows[1]:
+						cel._style = self.styles[2][it]
+					if index == self.prazos_rows[1]+1:
+						cel._style = self.styles[3][it]
+					if index >= self.acompanhamentos_rows[0] and index <= self.acompanhamentos_rows[1]:
+						cel._style = self.styles[2][it]
+					if index == self.acompanhamentos_rows[1]+1:
+						cel._style = self.styles[3][it]
+					if index >= self.audiencias_rows[0]:
+						cel._style = self.styles[2][it]
+				except:
+					continue
+
+				it +=1
 
 		print(" Done")
 
@@ -187,8 +284,8 @@ class XLSX:
 
 	def agroup(self):
 		self.print_prazos.set_main_structure()
-		self.print_acompanhamento_prazos.set_main_structure()
 		self.print_audiencias_prazos.set_main_structure()
+		self.print_acompanhamento_prazos.set_main_structure()
 
 	#########################################
 	##	Appends
