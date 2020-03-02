@@ -4,8 +4,12 @@ import _thread
 #pyqt
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtWidgets import QMainWindow, QPushButton, QApplication, QMessageBox, QLineEdit, QWidget, QLabel, QGridLayout, QRadioButton, QComboBox, QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QPushButton,
+			 QApplication, QMessageBox, QLineEdit, QWidget, QLabel, 
+			 QGridLayout, QRadioButton, QComboBox, QMessageBox, QFileDialog
 from PyQt5.QtGui import QIcon, QPixmap, QPainter, QFont, QPen, QIntValidator
+
+import trello_process
 
 class App(QMainWindow):
 
@@ -20,6 +24,7 @@ class App(QMainWindow):
 		self.TOP = 10
 		self.WIDTH = 800
 		self.HEIGHT = 600
+		_trello = trello_process.TrelloProcess() 
 
 		## Destroying Windows Flags
 		self.setWindowFlags(
@@ -36,6 +41,8 @@ class App(QMainWindow):
 	def initUI(self):
 		self.setWindowTitle(self.title)
 		self.setGeometry(self.LEFT, self.TOP, self.WIDTH, self.HEIGHT)
+
+
 
 		## Draw product btn
 		#self.drawProductButton()
