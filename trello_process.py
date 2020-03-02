@@ -46,11 +46,16 @@ class TrelloProcess:
 		self.get_lists()
 		self.process_data()
 
-		self.write_xlsx(self.CARDS.getDict(), self.AUDIENCIAS.getDict(), self.ACOMPANHAMENTOS.getDict())
+		#self.write_xlsx(self.CARDS.getDict(), self.AUDIENCIAS.getDict(), self.ACOMPANHAMENTOS.getDict())
 
 	###################################
 	##	METHODS						  #
 	###################################
+
+	# Save to file
+	def save(self, path):
+		self.write_xlsx(self.CARDS.getDict(), self.AUDIENCIA.getDict(), self.ACOMPANHAMENTOS.getDict(), path)
+
 	# Trello service connection
 	def convert_user(self):
 		index = 0
@@ -554,4 +559,4 @@ class TrelloProcess:
 			print("[SYSTEM] An error ocurred while trying to get board")
 			return
 
-t = TrelloProcess()
+#t = TrelloProcess()
