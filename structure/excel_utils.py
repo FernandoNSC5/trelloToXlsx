@@ -1,11 +1,12 @@
 from openpyxl import load_workbook
+from openpyxl.styles import PatternFill
 from datetime import datetime
 import printDataStructure
 import sys
 
 class XLSX:
 
-	def __init__(self, prazos, audiencias, acompanhamentos):
+	def __init__(self, prazos, audiencias, acompanhamentos, plan_path="src/planilha.xlsx"):
 		print("[XLSX] Initializing module", end=".")
 		sys.stdout.flush()
 
@@ -13,6 +14,7 @@ class XLSX:
 		self.prazos = prazos
 		self.audiencias = audiencias
 		self.acompanhamentos = acompanhamentos
+		self.plan_path = self.plan_path
 
 		self.max_rows = 100 #Defoult. Maybe change at load_data func
 		self.advogados = ["Cabral", "Vitória Tiannamen", "Raul Lobato", "Paulo Toledo"]
@@ -36,10 +38,16 @@ class XLSX:
 		# Elements
 		self.load_and_write_data()
 
+	def to_day_transform(self, data):
+		d, m, a = data.split('/')
+		d += m*30
+		d += a*365
+		return d
+
 	def sort_dict_lists(self, dict_recived): #By date sorting
 		for list_by_user in self.advogados:
 			lista = dict_recived[list_by_user]
-			lista.sort(key=lambda item: item['Prazo'], reverse=False)	
+			lista.sort(key=lambda item: self.to_day_transform(item['Prazo']), reverse=False)	
 			dict_recived[list_by_user] = lista
 		return dict_recived
 
@@ -64,7 +72,7 @@ class XLSX:
 		#3 -> LABEL LINES
 		self.styles = [list(), list(), list(), list()]
 
-		wb = load_workbook("src/planilha.xlsx")
+		wb = load_workbook(self.plan_path)
 		ws = wb.worksheets[0]
 
 		try:
@@ -204,8 +212,14 @@ class XLSX:
 		print("", end=".")
 		sys.stdout.flush()
 
-		#Creating new sheet in order to append new data
+		# Creating new sheet in order to append new data
 		ws = wb.create_sheet("Planilha atualizada", 0)
+
+		# Dropping old sheed
+		sheet_names = wb.get_sheet_names()
+		std = wb.get_sheet_by_name(sheet_names[-1])
+		wb.drop_sheet(std) #Droping old sheet
+
 		for i in written_all:
 			ws.append(i)
 
@@ -248,13 +262,29 @@ class XLSX:
 		for i in self.width_dict.keys():
 			ws.column_dimensions[i].width = self.width_dict[i]
 
+		#Setting name background collor
+		yellowFill = PatternFill(start_color='FFFF00',
+                   end_color='FFFF00',
+                   fill_type='solid')
+
 		#Setting styles
 		index = 0
 		for row in ws.iter_rows(min_row=1, max_col=9 , max_row=self.max_rows):
 			index += 1
 			it = 0
+			flag_name = False
+			counter = 0
 			for cel in row:
+				counter += 1
 				try:
+					#Defining flags
+					#Coloring adv name cell
+					if cell.value :
+						flag_name = True
+					if not flag_name and counter > 3:
+						cell.fill = yellowFill
+
+					flag_first = False
 					if index == 2:
 						cel._style = self.styles[0][it]
 					if index == 3:
@@ -277,6 +307,10 @@ class XLSX:
 		print(" Done")
 
 		print("[XLSX] Writing file")
+
+		#Editing name
+		var = self.plan_path.split('/')
+
 		# Escrevendo
 		wb.save("src/planilha_updated.xlsx")
 
