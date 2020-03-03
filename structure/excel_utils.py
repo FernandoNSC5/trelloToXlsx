@@ -36,7 +36,11 @@ class XLSX:
 		sys.stdout.flush()
 
 		# Elements
-		self.load_and_write_data()
+		#self.load_and_write_data()
+
+	#Now, it ads new file to place especified by user
+	def write_new_xlsx(self, new_path):
+		self.load_and_write_data(new_path)
 
 	def to_day_transform(self, data):
 		d, m, a = data.split('/')
@@ -52,7 +56,7 @@ class XLSX:
 		return dict_recived
 
 
-	def load_and_write_data(self):
+	def load_and_write_data(self, new_path):
 
 		print("[XLSX] Loading content", end=".")
 		sys.stdout.flush()
@@ -303,7 +307,12 @@ class XLSX:
 		var = self.plan_path.split('/')
 
 		# Escrevendo
-		wb.save("src/planilha_updated.xlsx")
+
+		if ".xlsx" not in new_path:
+			new_path += ".xlsx"
+
+
+		wb.save(new_path)
 
 		print("[XLSX] Completed")
 
