@@ -16,6 +16,8 @@ class TrelloProcess:
 		self.CABRAL_BOARD = None
 		self.USERS = list()
 
+		self.LOGGER = ""
+
 		##############################
 		##	LISTS
 		self.DONE_LIST = None
@@ -75,6 +77,7 @@ class TrelloProcess:
 			)
 			print("[SYSTEM] Connection stabilished")
 		except:
+			self.LOGGER += "A conexão falhou\n"
 			print("[SYSTEM] An error ocurred while parsing api key")
 			return
 
@@ -89,6 +92,7 @@ class TrelloProcess:
 					break
 			print("[SYSTEM] Board found")
 		except:
+			self.LOGGER += "Board " + self.data.get_board_name + " não encontrado\n"
 			print("[SYSTEM] An error ocurred while trying to retrieve board")
 			print("[SYSTEM] Known boards:")
 			for i in all_boards:
@@ -151,6 +155,7 @@ class TrelloProcess:
 			for member in members:
 				self.USERS.append(member.fetch().full_name)
 		except:
+			self.LOGGER += "Advogado não atrelado ao card " + card.name
 			print("[SYSTEM] An error ocurred while searching for users")
 			return
 
@@ -197,6 +202,7 @@ class TrelloProcess:
 
 				self.ACOMPANHAMENTOS.addCard(data['Advogado'], data)
 		except:
+			self.LOGGER += "Advogado não atrelado ao card " + card.name
 			print("[FAILURE] process_acompanhamento_list " + card.name)
 
 	# Process data retrieved from trello JULGAMENTO list
@@ -242,7 +248,11 @@ class TrelloProcess:
 
 				self.AUDIENCIAS.addCard(data['Advogado'], data)
 		except:
+			self.LOGGER += "Advogado não atrelado ao card " + card.name
 			print("[FAILURE] process_julgamento_list")
+
+	def getLogger(self):
+		return self.LOGGER
 
 	# Process data retrieved from trello fazendo list
 	def process_fazendo_list(self):
@@ -275,6 +285,7 @@ class TrelloProcess:
 				user = user_id.fetch().full_name
 				data["Advogado"] = self.filter_name(user)
 			except:
+				self.LOGGER += "Advogado não atrelado ao card " + card.name
 				print("Advogado não atrelado ao card " + card.name)
 				continue
 
@@ -317,6 +328,7 @@ class TrelloProcess:
 				user = user_id.fetch().full_name
 				data["Advogado"] = self.filter_name(user)
 			except:
+				self.LOGGER += "Advogado não atrelado ao card " + card.name
 				print("Advogado não atrelado ao card " + card.name)
 				continue
 
@@ -359,6 +371,7 @@ class TrelloProcess:
 				user = user_id.fetch().full_name
 				data["Advogado"] = self.filter_name(user)
 			except:
+				self.LOGGER += "Advogado não atrelado ao card " + card.name
 				print("Advogado não atrelado ao card " + card.name)
 				continue
 
@@ -401,6 +414,7 @@ class TrelloProcess:
 				user = user_id.fetch().full_name
 				data["Advogado"] = self.filter_name(user)
 			except:
+				self.LOGGER += "Advogado não atrelado ao card " + card.name
 				print("Advogado não atrelado ao card " + card.name)
 				continue
 
@@ -443,6 +457,7 @@ class TrelloProcess:
 				user = user_id.fetch().full_name
 				data["Advogado"] = self.filter_name(user)
 			except:
+				self.LOGGER += "Advogado não atrelado ao card " + card.name
 				print("Advogado não atrelado ao card " + card.name)
 				continue
 
@@ -475,6 +490,7 @@ class TrelloProcess:
 					break
 			print("[SYSTEM] List "+ self.DONE_LIST.name +" Found")
 		except:
+			self.LOGGER += "Lista " + self.data.get_list_feito + "não encontrada\n"
 			print("[SYSTEM] An error ocurred while trying to get board 'Finalizado'")
 			return
 
@@ -487,6 +503,7 @@ class TrelloProcess:
 					break
 			print("[SYSTEM] List "+ self.ESTUDOS_E_ACOMPANHAMENTOS_LIST.name +" Found")
 		except:
+			self.LOGGER += "Lista " + self.data.get_list_estudos_e_acompanhamentos + "não encontrada\n"
 			print("[SYSTEM] An error occurred while trying to get board")
 			return
 
@@ -499,6 +516,7 @@ class TrelloProcess:
 					break
 			print("[SYSTEM] List "+ self.AUDIENCIAS_E_JULGAMENTOS_LIST.name +" Found")
 		except:
+			self.LOGGER += "Lista " + self.data.get_list_audiencias_e_julgamentos + "não encontrada\n"
 			print("[SYSTEM] An error ocurred while trying to get board")
 			return
 
@@ -511,6 +529,7 @@ class TrelloProcess:
 					break 
 			print("[SYSTEM] List " + self.CABRAL_LIST.name + " Found")
 		except:
+			self.LOGGER += "Lista " + self.data.get_list_cabral + "não encontrada\n"
 			print("[SYSTEM] An error ocurred while trying to get board")
 			return
 
@@ -523,6 +542,7 @@ class TrelloProcess:
 					break
 			print("[SYSTEM] List " + self.PAULO_LIST.name + " Found")
 		except:
+			self.LOGGER += "Lista " + self.data.get_list_paulo + "não encontrada\n"
 			print("[SYSTEM] An error ocurred while trying to get board")
 			return
 
@@ -535,6 +555,7 @@ class TrelloProcess:
 					break
 			print("[SYSTEM] List " + self.RAUL_LIST.name + " Found")
 		except:
+			self.LOGGER += "Lista " + self.data.get_list_raul + "não encontrada\n"
 			print("[SYSTEM] An error ocurred while trying to get board")
 			return
 
@@ -547,6 +568,7 @@ class TrelloProcess:
 					break
 			print("[SYSTEM] List " + self.VITORIA_LIST.name + " Found")
 		except:
+			self.LOGGER += "Lista " + self.data.get_list_vitoria + "não encontrada\n"
 			print("[SYSTEM] An error ocurred while trying to get board")
 			return
 
@@ -559,6 +581,7 @@ class TrelloProcess:
 					break
 			print("[SYSTEM] List " + self.FAZENDO_LIST.name + " Found")
 		except:
+			self.LOGGER += "Lista " + self.data.get_list_fazendo + "não encontrada\n"
 			print("[SYSTEM] An error ocurred while trying to get board")
 			return
 
