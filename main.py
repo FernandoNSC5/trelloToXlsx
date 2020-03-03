@@ -1,11 +1,14 @@
 import sys
-import _thread
+import threading
+import time
 
 #pyqt
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QMainWindow, QPushButton, QApplication, QMessageBox, QLineEdit, QWidget, QLabel, QGridLayout, QRadioButton, QComboBox, QMessageBox
 from PyQt5.QtGui import QIcon, QPixmap, QPainter, QFont, QPen, QIntValidator
+
+import trello_process
 
 class App(QMainWindow):
 
@@ -14,7 +17,14 @@ class App(QMainWindow):
 
 		#################################################
 		##	STATIC VAR
-		self.pixmap = QPixmap("src/bg.png")
+		self.INITIALIZATION = "src/img/init.png"
+		self.BG = "src/img/bg.png"
+		self.ERROR = "src/img/error.png"
+
+		# INIT LOGGER
+		self.LOGGER = ""
+
+		self.pixmap = QPixmap(self.INITIALIZATION)
 		self.title = "Trello to XLSX"
 		self.LEFT = 10
 		self.TOP = 10
@@ -37,10 +47,72 @@ class App(QMainWindow):
 		self.setWindowTitle(self.title)
 		self.setGeometry(self.LEFT, self.TOP, self.WIDTH, self.HEIGHT)
 
+		#Initializing trello
+		'''try:
+			self.LOGGER = "Inicializando..."
+			self.TRELLO = trello_process.TrelloProcess()
+			self.LOGGER = "Conectando ao servidor..."
+			self.TRELLO.connection()
+			self.LOGGER = "Buscando Board..."
+			self.TRELLO.get_board()
+			self.LOGGER = "Buscando usuários..."
+			self.TRELLO.get_board_users()
+			self.LOGGER = "Processando usuários..."'''
+
+		#starting
+		self.draw_initialization()
+		try:
+			x =threading.Thread(target=self.load_system, args=())
+			x.start()
+		except:
+			print("ERROR")
+
 		## Draw product btn
 		#self.drawProductButton()
 
 		self.show()
+
+
+	def load_system(self):
+		self.init_label.setText("Inicializando...")
+		self.update()
+		self.TRELLO = trello_process.TrelloProcess()
+		self.init_label.setText("Conectando ao trello...")
+		self.update()
+		self.TRELLO.connection()
+		self.init_label.setText("Procurando Board...")
+		self.update()
+		self.TRELLO.get_board()
+		self.init_label.setText("Procurando usuários...")
+		self.update()
+		self.TRELLO.get_board_users()
+		self.init_label.setText("Processando usuários...")
+		self.update()
+		self.TRELLO.convert_user()
+		self.init_label.setText("Inicializando componentes...")
+		self.update()
+		self.TRELLO.setCards()
+		self.init_label.setText("Buscando listas...")
+		self.update()
+		self.TRELLO.get_lists()
+		self.init_label.setText("Processando dados recebidos")
+		self.update()
+		time.sleep(1)
+		self.init_label.setText("Processando dados recebidos.")
+		self.update()
+		self.TRELLO.process_data()
+		self.init_label.setText("Processando dados recebidos..")
+		self.update()
+		time.sleep(1)
+		self.init_label.setText("Processando dados recebidos...")
+		self.update()
+		time.sleep(1)
+		self.init_label.setText("Processando dados recebidos... Pronto")
+		self.update()
+		time.sleep(1)
+		self.init_label.setText("Logando")
+		self.update()
+		time.sleep(1)
 
 	#####################################################
 	##	Paint event
@@ -55,6 +127,16 @@ class App(QMainWindow):
 		pen.setCapStyle(QtCore.Qt.RoundCap)
 		pen.setJoinStyle(QtCore.Qt.RoundJoin)
 		painter.setPen(pen)
+
+	#####################################################
+	## SCREENS
+	def draw_initialization(self):
+		self.init_label = QLabel(self.LOGGER, self)
+		self.init_label.setVisible(True)
+		self.init_label.setAlignment(QtCore.Qt.AlignCenter)
+		self.init_label.move(200, 500)
+		self.init_label.setFixedWidth(400)
+		self.init_label.setStyleSheet("border:1px solid black; color: #4C0000; font-family: Calibri; font-size: 20px")
 
 	def drawProductButton(self):
 		## This conditional will tell the button what to display

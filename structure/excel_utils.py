@@ -14,7 +14,7 @@ class XLSX:
 		self.prazos = prazos
 		self.audiencias = audiencias
 		self.acompanhamentos = acompanhamentos
-		self.plan_path = self.plan_path
+		self.plan_path = plan_path
 
 		self.max_rows = 100 #Defoult. Maybe change at load_data func
 		self.advogados = ["Cabral", "Vitória Tiannamen", "Raul Lobato", "Paulo Toledo"]
@@ -218,7 +218,7 @@ class XLSX:
 		# Dropping old sheed
 		sheet_names = wb.get_sheet_names()
 		std = wb.get_sheet_by_name(sheet_names[-1])
-		wb.drop_sheet(std) #Droping old sheet
+		wb.remove_sheet(std) #Droping old sheet
 
 		for i in written_all:
 			ws.append(i)
@@ -272,17 +272,8 @@ class XLSX:
 		for row in ws.iter_rows(min_row=1, max_col=9 , max_row=self.max_rows):
 			index += 1
 			it = 0
-			flag_name = False
-			counter = 0
 			for cel in row:
-				counter += 1
 				try:
-					#Defining flags
-					#Coloring adv name cell
-					if cell.value :
-						flag_name = True
-					if not flag_name and counter > 3:
-						cell.fill = yellowFill
 
 					flag_first = False
 					if index == 2:

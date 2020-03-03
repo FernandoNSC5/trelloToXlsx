@@ -36,7 +36,7 @@ class TrelloProcess:
 
 		##############################
 		##	Starting
-		self.connection()
+		'''self.connection()
 		self.get_board()
 		self.get_board_users()
 		self.convert_user()
@@ -44,13 +44,21 @@ class TrelloProcess:
 		self.ACOMPANHAMENTOS = cards.Cards(self.USERS)
 		self.AUDIENCIAS = cards.Cards(self.USERS)
 		self.get_lists()
-		self.process_data()
+		self.process_data()'''
 
-		self.write_xlsx(self.CARDS.getDict(), self.AUDIENCIAS.getDict(), self.ACOMPANHAMENTOS.getDict())
+		#self.write_xlsx(self.CARDS.getDict(), self.AUDIENCIAS.getDict(), self.ACOMPANHAMENTOS.getDict())
 
 	###################################
 	##	METHODS						  #
 	###################################
+	def setCards(self):
+		self.CARDS = cards.Cards(self.USERS)
+		self.ACOMPANHAMENTOS = cards.Cards(self.USERS)
+		self.AUDIENCIAS = cards.Cards(self.USERS)
+
+	def create_xlsx(self, path):
+		self.write_xlsx(self.CARDS.getDict(), self.AUDIENCIAS.getDict(), self.ACOMPANHAMENTOS.getDict(), path)
+
 	# Trello service connection
 	def convert_user(self):
 		index = 0
@@ -554,4 +562,4 @@ class TrelloProcess:
 			print("[SYSTEM] An error ocurred while trying to get board")
 			return
 
-t = TrelloProcess()
+#t = TrelloProcess()
