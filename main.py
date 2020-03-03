@@ -176,7 +176,27 @@ class App(QMainWindow):
 		#self.pathBtn.resize()
 		#self.pathBtn.setStylesheet()
 		#self.pathBtn.move()
-		self.pathBtn.clicked.connect(self.findPath)
+		path = self.pathBtn.clicked.connect(self.findPath)
+		if path == None:
+			self.textPath.setText("Escolha um arquivo")
+			self.update()
+			return
+		self.textPath.setText(path)
+		self.update()
+
+		#####################
+		##	SAVING METHOD  ##
+		#####################
+		self.savePathBtn = QPushButton("Gerar XLSX", self)
+
+		save_path = self.call_save_file_explorer()
+		if save_path == None:
+			return
+
+		try:
+			self.TRELLO.create_xlsx(save_path)
+		except:
+			print("falha ao salvar arquivo")
 
 	def call_file_explorer(self):
 		#	File manager
@@ -185,6 +205,15 @@ class App(QMainWindow):
 		files, _ = QFileDialog.getOpenFileName(self, "QFileDialog.getOpenFileName()", "", "Excel Files (*xlsx)", options=options)
 		if fileName:
 			print(files)
+			return fileName
+		return None
+
+	def call_save_file_explorer(self):
+		options = QFileDialog.Options()
+		options |= QFileDialog.DontUseNativeDialog
+		fileName, _ = QFileDialog.getSaveFileName(self, "QFileDialog.getSaveFileName()", "", "Excel Files (*.xlsx)", options=options)
+		if fileName:
+			print(fileName)
 			return fileName
 		return None
 
@@ -220,7 +249,7 @@ class App(QMainWindow):
 	#	Python slots
 	@pyqtSlot()
 	def findPath(self):
-		self.call_file_explorer()
+		return self.call_file_explorer()
 
 if __name__ == '__main__':
 	app = QApplication(sys.argv)
