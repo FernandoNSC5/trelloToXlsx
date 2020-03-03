@@ -5,7 +5,9 @@ import time
 #pyqt
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtWidgets import QMainWindow, QPushButton, QApplication, QMessageBox, QLineEdit, QWidget, QLabel, QGridLayout, QRadioButton, QComboBox, QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QPushButton, QApplication, QMessageBox, 
+							QLineEdit, QWidget, QLabel, QGridLayout, QRadioButton, 
+							QComboBox, QMessageBox, QFileDialog
 from PyQt5.QtGui import QIcon, QPixmap, QPainter, QFont, QPen, QIntValidator
 
 import trello_process
@@ -25,7 +27,7 @@ class App(QMainWindow):
 		self.LOGGER = ""
 
 		self.pixmap = QPixmap(self.INITIALIZATION)
-		self.title = "Trello to XLSX"
+		self.title = "Conversor XLSX"
 		self.LEFT = 10
 		self.TOP = 10
 		self.WIDTH = 800
@@ -114,6 +116,29 @@ class App(QMainWindow):
 		self.update()
 		time.sleep(1)
 
+		#Changing layout
+		self.turn_off_all([self.init_label])
+		self.pixmap = QPixmap(self.BG)
+		self.update()
+
+	def turn_off_all(self, elements):
+		for data in elements:
+			data.setVisible(False)
+
+	def start_main_screen(self):
+		self.LABEL_FILE_MANAGER = "Selecione a planilha:"
+		self.BUTTON_NAME = "Gerar Planilha"
+		self.LOGGER = TRELLO.getLogger() 	#Getting initial logger
+
+		#Shows errors if existent
+		if self.LOGGER != "":
+			msg = QMessageBox()
+			msg.setText(self.LOGGER)
+			msg.setWindowsTitle("Atenção")
+			msg.setStandardButtons(QMessageBox.Ok)
+
+		self.draw_main_screen()
+
 	#####################################################
 	##	Paint event
 	def paintEvent(self, e):
@@ -130,6 +155,39 @@ class App(QMainWindow):
 
 	#####################################################
 	## SCREENS
+	def draw_main_screen(self):
+		# Label for path
+		self.pathLabel = QLabel(self)
+		self.pathLabel.setVisible(True)
+		#self.pathLabel.move()
+		#self.pathLabel.resize()
+		self.pathLabel.setText("Arquivo: ")
+
+		# Path
+		self.textPath = QLine(self)
+		self.textPath.setVisible(True)
+		self.textPath.disabled(True)
+		#self.textPath.width()
+		self.setText("Escolha um arquivo")
+
+		# Button for path search
+		self.pathBtn = QPushButton("Buscar", self)
+		self.pathBtn.setVisible(True)
+		#self.pathBtn.resize()
+		#self.pathBtn.setStylesheet()
+		#self.pathBtn.move()
+		self.pathBtn.clicked.connect(self.findPath)
+
+	def call_file_explorer(self):
+		#	File manager
+		options = QFileDialog.Options()
+		opstions |= QFileDialog.DontUseNativeDialog
+		files, _ = QFileDialog.getOpenFileName(self, "QFileDialog.getOpenFileName()", "", "Excel Files (*xlsx)", options=options)
+		if fileName:
+			print(files)
+			return fileName
+		return None
+
 	def draw_initialization(self):
 		self.init_label = QLabel(self.LOGGER, self)
 		self.init_label.setVisible(True)
@@ -161,8 +219,8 @@ class App(QMainWindow):
 	#########################################################
 	#	Python slots
 	@pyqtSlot()
-	def productAppAction(self):
-		print("Button is working")
+	def findPath(self):
+		self.call_file_explorer()
 
 if __name__ == '__main__':
 	app = QApplication(sys.argv)
